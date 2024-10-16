@@ -1,0 +1,11 @@
+pandas
+matplotlib
+seaborn
+scikit-learn
+xgboost
+imblearn
+streamlit
+numpy
+python-dotenv
+groq
+plotly
