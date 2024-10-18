@@ -7,14 +7,11 @@ import os
 
 flask_app = Flask(__name__)
 
-groq_client = None
-models = []
-load_error = None
+flask_app.config["groq_client"] = None
+flask_app.config["models"] = []
+flask_app.config["model_load_error"] = None
 
 def load_models():
-
-    global models
-    global load_error
 
     try:
 
@@ -30,11 +27,11 @@ def load_models():
         for model_name, filename in filenames:
             with open(filename, "rb") as file:
                 model = pickle.load(file)
-                models.append((model_name, model))
+                flask_app.config["models"].append((model_name, model))
         
     except Exception as e:
         
-        load_error = str(e)
+        flask_app.config["model_load_error"] = str(e)
 
 @flask_app.route("/get-data", methods=["GET"])
 def get_data():
@@ -55,9 +52,9 @@ def get_data():
 @flask_app.route("/predict", methods=["POST"])
 def predict():
 
-    if load_error:
+    if flask_app.config["model_load_error"] is not None:
 
-        return jsonify({"error": load_error}), 500
+        return jsonify({"error": flask_app.config["model_load_error"]}), 500
     
     if request.method == "POST":
         
@@ -66,7 +63,7 @@ def predict():
         input_df = pd.DataFrame([input_dict])
         
         probabilities = {}
-        for model_name, model in models:
+        for model_name, model in flask_app.config["models"]:
             prob = model.predict_proba(input_df)[0][1]
             probabilities[model_name] = float(prob)
 
@@ -86,7 +83,7 @@ def explain_prediction():
         system_prompt = data["system_prompt"]
         prompt = data["prompt"]
 
-        raw_response = groq_client.chat.completions.create(
+        raw_response = flask_app.config["groq_client"].chat.completions.create(
             model="llama-3.1-70b-versatile", 
             messages=[
                 {"role": "system", "content": system_prompt},
@@ -112,7 +109,7 @@ def generate_email():
             system_prompt = data["system_prompt"]
             prompt = data["prompt"]
 
-            raw_response = groq_client.chat.completions.create(
+            raw_response = flask_app.config["groq_client"].chat.completions.create(
                 model="llama-3.1-70b-versatile", 
                 messages=[
                     {"role": "system", "content": system_prompt},
@@ -132,30 +129,15 @@ def generate_email():
 
 @flask_app.route("/", methods=["GET"])
 def test():
-    current_directory = os.getcwd()
     
-    # Get files in current directory
-    current_files = os.listdir('.')
-    
-    # Get files in 'db' directory
-    db_files = os.listdir('./db')
-    
-    # Get files in 'models' directory
-    models_files = os.listdir('./models')
-    
-    return jsonify({
-        "current_directory": current_directory,
-        "current_files": current_files,
-        "db_files": db_files,
-        "models_files": models_files
-    }), 200
+    return jsonify({}), 200
 
 if __name__ == '__main__':
 
     # Load environment variables
     load_dotenv()
 
-    groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+    flask_app.config["groq_client"] = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
     # Load model
     load_models()
