@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 import os
 from groq import Groq
 
-app = Flask(__name__)
+flask_app = Flask(__name__)
 
 groq_client = None
 models = []
@@ -21,7 +21,7 @@ def load_models():
             model = pickle.load(file)
             models.append((model_name, model))
 
-@app.route("/get-data", methods=["GET"])
+@flask_app.route("/get-data", methods=["GET"])
 def get_data():
     
     try:
@@ -36,7 +36,7 @@ def get_data():
         
         return jsonify({"error": f"An error occurred: {str(e)}"}), 500
 
-@app.route("/predict", methods=["POST"])
+@flask_app.route("/predict", methods=["POST"])
 def predict():
     
     if request.method == "POST":
@@ -56,7 +56,7 @@ def predict():
         
         return jsonify({"error": "Method not allowed"}), 405
 
-@app.route("/explain-prediction", methods=["POST"])
+@flask_app.route("/explain-prediction", methods=["POST"])
 def explain_prediction():
 
     if request.method == "POST":
@@ -80,7 +80,7 @@ def explain_prediction():
 
         return jsonify({"error": "Method not allowed"}), 405
 
-@app.route("/generate-email", methods=["POST"])
+@flask_app.route("/generate-email", methods=["POST"])
 def generate_email():
 
     if request.method == "POST":
@@ -115,4 +115,4 @@ if __name__ == '__main__':
     load_models() 
 
     # Run app
-    app.run(host='0.0.0.0', port=80)
+    flask_app.run(host='0.0.0.0', port=8000)
