@@ -9,24 +9,32 @@ flask_app = Flask(__name__)
 
 groq_client = None
 models = []
+load_error = None
 
 def load_models():
 
     global models
+    global load_error
 
-    filenames = [("XGBoost", "./flask/models/xgb_model.pkl"), ("Random Forest", "./flask/models/rf_model.pkl"), ("K-Nearest Neighbors", "./flask/models/knn_model.pkl")]
-    
-    for model_name, filename in filenames:
-        with open(filename, "rb") as file:
-            model = pickle.load(file)
-            models.append((model_name, model))
+    try:
+
+        filenames = [("XGBoost", "./models/xgb_model.pkl"), ("Random Forest", "./models/rf_model.pkl"), ("K-Nearest Neighbors", "./models/knn_model.pkl")]
+        
+        for model_name, filename in filenames:
+            with open(filename, "rb") as file:
+                model = pickle.load(file)
+                models.append((model_name, model))
+        
+    except Exception as e:
+        
+        load_error = str(e)
 
 @flask_app.route("/get-data", methods=["GET"])
 def get_data():
     
     try:
         
-        df = pd.read_csv("./flask/db/churn.csv")
+        df = pd.read_csv("./db/churn.csv")
         
         churn_data = df.to_dict(orient="records")
         
@@ -38,6 +46,10 @@ def get_data():
 
 @flask_app.route("/predict", methods=["POST"])
 def predict():
+
+    if load_error:
+
+        return jsonify({"error": load_error}), 500
     
     if request.method == "POST":
         
@@ -85,20 +97,26 @@ def generate_email():
 
     if request.method == "POST":
 
-        data = request.json
+        try:
 
-        system_prompt = data["system_prompt"]
-        prompt = data["prompt"]
+            data = request.json
 
-        raw_response = groq_client.chat.completions.create(
-            model="llama-3.1-70b-versatile", 
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": prompt}
-            ]
-        )
+            system_prompt = data["system_prompt"]
+            prompt = data["prompt"]
 
-        return jsonify({ "response": raw_response.choices[0].message.content }), 200
+            raw_response = groq_client.chat.completions.create(
+                model="llama-3.1-70b-versatile", 
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": prompt}
+                ]
+            )
+
+            return jsonify({ "response": raw_response.choices[0].message.content }), 200
+    
+        except Exception as e:
+
+            return jsonify({"error": f"An error occurred: {str(e)}"}), 500
 
     else:
 
