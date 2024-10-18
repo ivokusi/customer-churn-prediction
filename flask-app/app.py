@@ -2,8 +2,8 @@ import pandas as pd
 from flask import Flask, request, jsonify
 import pickle
 from dotenv import load_dotenv
-import os
 from groq import Groq
+import os
 
 flask_app = Flask(__name__)
 
