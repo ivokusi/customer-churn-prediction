@@ -42,7 +42,6 @@ def prepare_input(credit_score, age, tenure, balance, num_products, has_credit_c
 def make_predictions(input_dict):
 
     response = requests.post("https://customer-churn-prediction-101.azurewebsites.net/predict", json=input_dict)
-    print(response.json())
 
     probabilities = response.json()
 
