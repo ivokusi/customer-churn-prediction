@@ -124,10 +124,22 @@ def generate_email():
 
 @flask_app.route("/", methods=["GET"])
 def test():
-
     current_directory = os.getcwd()
+    
+    # Get files in current directory
+    current_files = os.listdir('.')
+    
+    # Get files in 'db' directory
+    db_files = os.listdir('./db')
+    
+    # Get files in 'models' directory
+    models_files = os.listdir('./models')
+    
     return jsonify({
-        "current_directory": current_directory
+        "current_directory": current_directory,
+        "current_files": current_files,
+        "db_files": db_files,
+        "models_files": models_files
     }), 200
 
 if __name__ == '__main__':
