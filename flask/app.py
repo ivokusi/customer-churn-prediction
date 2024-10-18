@@ -14,7 +14,7 @@ def load_models():
 
     global models
 
-    filenames = [("XGBoost", "./models/xgb_model.pkl"), ("Random Forest", "./models/rf_model.pkl"), ("K-Nearest Neighbors", "./models/knn_model.pkl")]
+    filenames = [("XGBoost", "./flask/models/xgb_model.pkl"), ("Random Forest", "./flask/models/rf_model.pkl"), ("K-Nearest Neighbors", "./flask/models/knn_model.pkl")]
     
     for model_name, filename in filenames:
         with open(filename, "rb") as file:
@@ -26,7 +26,7 @@ def get_data():
     
     try:
         
-        df = pd.read_csv("./db/churn.csv")
+        df = pd.read_csv("./flask/db/churn.csv")
         
         churn_data = df.to_dict(orient="records")
         
