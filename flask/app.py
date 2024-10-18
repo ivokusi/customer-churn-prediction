@@ -104,6 +104,14 @@ def generate_email():
 
         return jsonify({"error": "Method not allowed"}), 405
 
+@flask_app.route("/", methods=["GET"])
+def test():
+
+    current_directory = os.getcwd()
+    return jsonify({
+        "current_directory": current_directory
+    }), 200
+
 if __name__ == '__main__':
 
     # Load environment variables
