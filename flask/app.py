@@ -18,8 +18,15 @@ def load_models():
 
     try:
 
-        filenames = [("XGBoost", "./models/xgb_model.pkl"), ("Random Forest", "./models/rf_model.pkl"), ("K-Nearest Neighbors", "./models/knn_model.pkl")]
-        
+        # Get the absolute path to the directory containing this script
+        base_path = os.path.dirname(os.path.abspath(__file__))
+
+        filenames = [
+            ("XGBoost", os.path.join(base_path, "models", "xgb_model.pkl")),
+            ("Random Forest", os.path.join(base_path, "models", "rf_model.pkl")),
+            ("K-Nearest Neighbors", os.path.join(base_path, "models", "knn_model.pkl"))
+        ]
+
         for model_name, filename in filenames:
             with open(filename, "rb") as file:
                 model = pickle.load(file)
@@ -34,7 +41,8 @@ def get_data():
     
     try:
         
-        df = pd.read_csv("./db/churn.csv")
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        df = pd.read_csv(os.path.join(base_path, "db", "churn.csv"))
         
         churn_data = df.to_dict(orient="records")
         
@@ -62,7 +70,7 @@ def predict():
             prob = model.predict_proba(input_df)[0][1]
             probabilities[model_name] = float(prob)
 
-        return jsonify(probabilities, len(models)), 200
+        return jsonify(probabilities), 200
     
     else:
         
@@ -150,7 +158,7 @@ if __name__ == '__main__':
     groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
     # Load model
-    load_models() 
+    load_models()
 
     # Run app
     flask_app.run(host='0.0.0.0', port=8000)
