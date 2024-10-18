@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 import os
 from groq import Groq
 
+# Initialize Flask app
 flask_app = Flask(__name__)
 
 groq_client = None
