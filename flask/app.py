@@ -97,7 +97,7 @@ def generate_email():
             system_prompt = data["system_prompt"]
             prompt = data["prompt"]
 
-            raw_response = flask_app.config["groq_client"].chat.completions.create(
+            raw_response = groq_client.chat.completions.create(
                 model="llama-3.1-70b-versatile", 
                 messages=[
                     {"role": "system", "content": system_prompt},
