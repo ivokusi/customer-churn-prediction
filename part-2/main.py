@@ -1,41 +1,23 @@
 import streamlit as st
 import pandas as pd
-import pickle
 import numpy as np
-from dotenv import load_dotenv
-import os
-from groq import Groq
 import util as ut
+import requests
 
-load_dotenv()
-
-# AI model
-
-groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
-
-# ML models
-
-def load_model(filename):
-    with open(filename, "rb") as file:
-        return pickle.load(file)
+@st.cache_data
+def get_data():
     
-xgboost_model = load_model("../part-1/models/xgb_model.pkl")
-
-naive_bayes_model = load_model("../part-1/models/nb_model.pkl")
-
-random_forest_model = load_model("../part-1/models/rf_model.pkl")
-
-decision_tree_model = load_model("../part-1/models/dt_model.pkl")
-
-svm_model = load_model("../part-1/models/svm_model.pkl")
-
-knn_model = load_model("../part-1/models/knn_model.pkl")
-
-voting_classifier_model = load_model("../part-1/models/voting_clf_hard.pkl")
-
-xgboost_SMOTE_model = load_model("../part-1/models/xgb_smote_model.pkl")
-
-xgboost_feature_engineered_model = load_model("../part-1/models/xgb_feature_engineered_model.pkl")
+    response = requests.get("https://selected-gently-swift.ngrok-free.app/get-data")
+    
+    if response.status_code == 200:
+    
+        data = response.json()
+    
+        return pd.DataFrame(data) 
+    
+    else:
+    
+        raise Exception(f"Failed to fetch data: {response.status_code}")
 
 def prepare_input(credit_score, age, tenure, balance, num_products, has_credit_card, is_active_member, estimated_salary, location, gender):
 
@@ -55,16 +37,12 @@ def prepare_input(credit_score, age, tenure, balance, num_products, has_credit_c
         "Gender_Female": 1 if gender == "Female" else 0
     }
 
-    input_df = pd.DataFrame([input_dict])
-    return input_df, input_dict
+    return input_dict
     
-def make_predictions(input_df):
+def make_predictions(input_dict):
 
-    probabilities = {
-        "XGBoost": xgboost_model.predict_proba(input_df)[0][1],
-        "Random Forest": random_forest_model.predict_proba(input_df)[0][1],
-        "K-Nearest Neighbors": knn_model.predict_proba(input_df)[0][1],
-    }
+    response = requests.post("https://selected-gently-swift.ngrok-free.app/predict", json=input_dict)
+    probabilities = response.json()
 
     avg_probability = np.mean(list(probabilities.values()))
 
@@ -136,17 +114,12 @@ def explain_prediction(probability, input_dict, surname):
     Don't mention the probability of churning, or the machine learning model, or say anything like "Based on the machine ñearning model's prediction and top 10 most important features", just explain the prediction.
     """
 
-    print("EXPLANATION PROMPT", prompt)
+    response = requests.post("https://selected-gently-swift.ngrok-free.app/explain-prediction", json={
+        "system_prompt": system_prompt,
+        "prompt": prompt
+    })
 
-    raw_response = groq_client.chat.completions.create(
-        model="llama-3.1-70b-versatile", # llama-3.1-70b-versatile
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": prompt}
-        ]
-    )
-
-    return raw_response.choices[0].message.content
+    return response.json()["response"]
 
 def generate_email(probability, input_dict, explanation, surname):
 
@@ -166,23 +139,18 @@ def generate_email(probability, input_dict, explanation, surname):
     {explanation}
     """
 
-    print("EMAIL PROMPT", prompt)
+    response = requests.post("https://selected-gently-swift.ngrok-free.app/generate-email", json={
+        "system_prompt": system_prompt,
+        "prompt": prompt
+    })
 
-    raw_response = groq_client.chat.completions.create(
-        model="llama-3.1-70b-versatile", # llama-3.1-70b-versatile
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": prompt}
-        ]
-    )
-
-    return raw_response.choices[0].message.content
+    return response.json()["response"]
 
 # Frontend
 
 st.title("Customer Churn Prediction")
 
-df = pd.read_csv("../churn.csv")
+df = get_data()
 
 customers = [f"{row["CustomerId"]} - {row["Surname"]}" for _, row in df.iterrows()]
 
@@ -264,8 +232,8 @@ with col2:
         value=float(selected_customer["EstimatedSalary"])
     )
 
-input_df, input_dict = prepare_input(credit_score, age, tenure, balance, num_products, has_credit_card, is_active_member, estimated_salary, location, gender)
-avg_probability = make_predictions(input_df)
+input_dict = prepare_input(credit_score, age, tenure, balance, num_products, has_credit_card, is_active_member, estimated_salary, location, gender)
+avg_probability = make_predictions(input_dict)
 
 percentiles = get_percentiles(df, input_dict, ["NumOfProducts", "Balance", "EstimatedSalary", "Tenure", "CreditScore"])
 

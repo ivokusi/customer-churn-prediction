@@ -9,3 +9,5 @@ numpy
 python-dotenv
 groq
 plotly
+flask
+requests
