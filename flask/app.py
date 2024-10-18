@@ -62,7 +62,7 @@ def predict():
             prob = model.predict_proba(input_df)[0][1]
             probabilities[model_name] = float(prob)
 
-        return jsonify(probabilities), 200
+        return jsonify(probabilities, len(models)), 200
     
     else:
         
