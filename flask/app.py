@@ -69,13 +69,25 @@ def explain_prediction():
         system_prompt = data["system_prompt"]
         prompt = data["prompt"]
 
-        raw_response = groq_client.chat.completions.create(
-            model="llama-3.1-70b-versatile", 
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": prompt}
-            ]
-        )
+        models = ["llama-3.1-8b-instant", "llama-3.1-70b-versatile", "llama3-70b-8192", "llama3-8b-8192", "gemma2-9b-it"]
+
+        for model in models:
+
+            try:
+
+                raw_response = groq_client.chat.completions.create(
+                    model=model, 
+                    messages=[
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": prompt}
+                    ]
+                )
+
+                break
+
+            except Exception as e:
+
+                continue
 
         return jsonify({ "response": raw_response.choices[0].message.content }), 200
 
@@ -97,13 +109,25 @@ def generate_email():
             system_prompt = data["system_prompt"]
             prompt = data["prompt"]
 
-            raw_response = groq_client.chat.completions.create(
-                model="llama-3.1-70b-versatile", 
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": prompt}
-                ]
-            )
+            models = ["llama-3.1-8b-instant", "llama-3.1-70b-versatile", "llama3-70b-8192", "llama3-8b-8192", "gemma2-9b-it"]
+
+            for model in models:
+
+                try:
+
+                    raw_response = groq_client.chat.completions.create(
+                        model=model, 
+                        messages=[
+                            {"role": "system", "content": system_prompt},
+                            {"role": "user", "content": prompt}
+                        ]
+                    )
+
+                    break
+
+                except Exception as e:
+
+                    continue
 
             return jsonify({ "response": raw_response.choices[0].message.content }), 200
     
