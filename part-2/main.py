@@ -19,6 +19,7 @@ def get_data():
     
         raise Exception(f"Failed to fetch data: {response.status_code}")
 
+@st.cache_data
 def prepare_input(credit_score, age, tenure, balance, num_products, has_credit_card, is_active_member, estimated_salary, location, gender):
 
     input_dict = {
@@ -39,6 +40,7 @@ def prepare_input(credit_score, age, tenure, balance, num_products, has_credit_c
 
     return input_dict
     
+@st.cache_data
 def make_predictions(input_dict):
 
     response = requests.post("https://customer-churn-prediction-101.azurewebsites.net/predict", json=input_dict)
@@ -60,12 +62,14 @@ def make_predictions(input_dict):
 
     return avg_probability
 
+@st.cache_data
 def get_percentiles(df, input_dict, columns):
 
     df_stats = df.describe()
 
     return { column: input_dict[column] / df_stats[column]["max"] if column != "CreditScore" else (input_dict[column] - 300) / (850 - 300) for column in columns }
 
+@st.cache_data
 def explain_prediction(probability, input_dict, surname):
 
     system_prompt = f"""You are an expert data scientist at a bank, where you specialize in interpreting and explaining predictions of machine learning models.
@@ -128,6 +132,7 @@ def explain_prediction(probability, input_dict, surname):
 
         return "Internal Server Error"
 
+@st.cache_data
 def generate_email(probability, input_dict, explanation, surname):
 
     system_prompt = f"""You are a manager at HS Bank. You are responsible for ensuring customers stay with the bank and are incentivized with various offers.
