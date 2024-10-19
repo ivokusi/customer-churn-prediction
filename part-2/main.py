@@ -131,6 +131,8 @@ def generate_email(probability, input_dict, explanation, surname):
 
     Generate an email to the customer based on their information, asking them to stay if they are at risk of churning, or offering them incentives so that thet become more loyal to the bank.
 
+    Use Mr. or Ms. followed by the customer's surname to address the customer. Use Mr. if the customer is male and Ms. if the customer is female.
+
     Make sure to list out a set of incentives to stay based on their information, in bullet point format. Don't ever mention the probability of churning, or the machine learning model to the customer.
 
     Here is the customer's information:
