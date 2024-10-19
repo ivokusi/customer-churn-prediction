@@ -120,7 +120,13 @@ def explain_prediction(probability, input_dict, surname):
         "prompt": prompt
     })
 
-    return response.json().get("response", "API Limit Reached")
+    if response.status_code == 200:
+
+        return response.json().get("response", "API Limit Reached")
+    
+    else:
+
+        return "Internal Server Error"
 
 def generate_email(probability, input_dict, explanation, surname):
 
@@ -147,7 +153,13 @@ def generate_email(probability, input_dict, explanation, surname):
         "prompt": prompt
     })
 
-    return response.json().get("response", "API Limit Reached")
+    if response.status_code == 200:
+
+        return response.json().get("response", "API Limit Reached")
+    
+    else:
+
+        return "Internal Server Error"
 
 # Frontend
 
