@@ -247,7 +247,7 @@ st.markdown("---")
 
 st.subheader("Explanation of Prediction")
 
-st.markdown(explanation)
+st.write_stream(explanation)
 
 email = generate_email(avg_probability, input_dict, explanation, selected_customer["Surname"])
 
@@ -255,4 +255,4 @@ st.markdown("---")
 
 st.subheader("Personalized Email")
 
-st.markdown(email)
+st.write_stream(email)
