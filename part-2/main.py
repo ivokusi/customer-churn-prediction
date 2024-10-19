@@ -120,7 +120,7 @@ def explain_prediction(probability, input_dict, surname):
         "prompt": prompt
     })
 
-    return response.json()["response"]
+    return response.json().get("response", "API Limit Reached")
 
 def generate_email(probability, input_dict, explanation, surname):
 
@@ -147,7 +147,7 @@ def generate_email(probability, input_dict, explanation, surname):
         "prompt": prompt
     })
 
-    return response.json()["response"]
+    return response.json().get("response", "API Limit Reached")
 
 # Frontend
 
